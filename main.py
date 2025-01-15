@@ -1,13 +1,26 @@
 import hidmsr.commands as cmds
 import hidmsr.convert as conv
-import parse
+import utils
 import csv
 from datetime import datetime
 import time
 import os
 
+def count_id_occurrences(filename, target_id):
+    count = 0
+    try:
+        with open(filename, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader)  # Skip header
+            for row in reader:
+                if len(row) >= 3 and row[2] == target_id:
+                    count += 1
+    except Exception as e:
+        print(f"Error reading file: {str(e)}")
+        return 0
+    return count
+
 def main():
-    # Create Data/Logs directory structure
     data_dir = "Data"
     logs_dir = os.path.join(data_dir, "Logs")
     os.makedirs(logs_dir, exist_ok=True)
@@ -16,39 +29,55 @@ def main():
     m.set_hico()
     m.set_bpi(210, 75, 210)
 
-    # Create filename with nested directory path
     filename = os.path.join(logs_dir, f"{datetime.now().strftime('%m-%d-%y')}.csv")
-    
-    # Check if file exists and is not empty
     file_exists = os.path.exists(filename) and os.path.getsize(filename) > 0
 
     with open(filename, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
         if not file_exists:
-            writer.writerow(['Date', 'Time', 'ID'])
+            writer.writerow(['Date', 'Time', 'ID', 'Status'])
         
         print(f"Ready to read cards. Writing to {filename}. Press Ctrl+C to exit.")
+        last_card_id = None
+        last_read_time = 0
+        CARD_COOLDOWN = 1  # seconds
+        
         try:
             while True:
                 out = m.read()
                 data = conv.decode_msr_data(out)
-                card_id = parse.extract_id(data)
+                card_id = utils.extract_id(data)
+                current_time = time.time()
                 
                 if card_id:
-                    current_date = datetime.now().strftime('%Y-%m-%d')
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    writer.writerow([current_date, current_time, card_id])
-                    print(f"Recorded ID: {card_id} at {current_date}, {current_time}")
-                    csvfile.flush()
-                time.sleep(0.1)
+                    # Clear last_card_id if enough time has passed
+                    if current_time - last_read_time > CARD_COOLDOWN:
+                        last_card_id = None
+                    
+                    if card_id != last_card_id:
+                        current_date = datetime.now().strftime('%Y-%m-%d')
+                        current_time_str = datetime.now().strftime('%H:%M:%S')
+                        
+                        try:
+                            count = count_id_occurrences(filename, card_id)
+                            status = "Out" if count % 2 == 1 else "In"
+                            
+                            writer.writerow([current_date, current_time_str, card_id, status])
+                            print(f"Recorded ID: {card_id} at {current_date}, {current_time_str} - {status}")
+                            csvfile.flush()
+                            
+                            last_card_id = card_id
+                            last_read_time = current_time
+                        except Exception as e:
+                            print(f"Error processing card: {str(e)}")
+                
+                time.sleep(0.1)  # Reduced sleep time for better responsiveness
                 
         except KeyboardInterrupt:
             print("\nStopping card reader...")
-            
         except Exception as e:
             print(f"\nError occurred: {str(e)}")
         finally:
             print("Program terminated.")
-
 if __name__ == "__main__":
     main()
