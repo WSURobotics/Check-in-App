@@ -4,6 +4,7 @@ import parse
 import csv
 from datetime import datetime
 import time
+import os
 
 def main():
     m = cmds.MSRDevice()
@@ -11,10 +12,14 @@ def main():
     m.set_bpi(210, 75, 210)
 
     filename = f"{datetime.now().strftime('%Y-%m-%d')}.csv"
+    
+    # Check if file exists and is not empty
+    file_exists = os.path.exists(filename) and os.path.getsize(filename) > 0
 
     with open(filename, 'a', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['Timestamp', 'ID'])
+        if not file_exists:
+            writer.writerow(['Date', 'Time', 'ID'])
         
         print(f"Ready to read cards. Writing to {filename}. Press Ctrl+C to exit.")
         try:
@@ -24,14 +29,16 @@ def main():
                 card_id = parse.extract_id(data)
                 
                 if card_id:
-                    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    writer.writerow([timestamp, card_id])
-                    print(f"Recorded ID: {card_id} at {timestamp}")
+                    current_date = datetime.now().strftime('%Y-%m-%d')
+                    current_time = datetime.now().strftime('%H:%M:%S')
+                    writer.writerow([current_date, current_time, card_id])
+                    print(f"Recorded ID: {card_id} at {current_date}, {current_time}")
                     csvfile.flush()
-                time.sleep(0.1)  # Small delay to prevent CPU overuse
+                time.sleep(0.1)
                 
         except KeyboardInterrupt:
             print("\nStopping card reader...")
+            
         except Exception as e:
             print(f"\nError occurred: {str(e)}")
         finally:
