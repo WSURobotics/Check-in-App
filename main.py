@@ -7,11 +7,17 @@ import time
 import os
 
 def main():
+    # Create Data/Logs directory structure
+    data_dir = "Data"
+    logs_dir = os.path.join(data_dir, "Logs")
+    os.makedirs(logs_dir, exist_ok=True)
+
     m = cmds.MSRDevice()
     m.set_hico()
     m.set_bpi(210, 75, 210)
 
-    filename = f"{datetime.now().strftime('%Y-%m-%d')}.csv"
+    # Create filename with nested directory path
+    filename = os.path.join(logs_dir, f"{datetime.now().strftime('%m-%d-%y')}.csv")
     
     # Check if file exists and is not empty
     file_exists = os.path.exists(filename) and os.path.getsize(filename) > 0
