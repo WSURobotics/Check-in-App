@@ -40,7 +40,7 @@ def main():
         print(f"Ready to read cards. Writing to {filename}. Press Ctrl+C to exit.")
         last_card_id = None
         last_read_time = 0
-        CARD_COOLDOWN = 1  # seconds
+        CARD_COOLDOWN = 1 
         
         try:
             while True:
@@ -71,7 +71,7 @@ def main():
                         except Exception as e:
                             print(f"Error processing card: {str(e)}")
                 
-                time.sleep(0.1)  # Reduced sleep time for better responsiveness
+                time.sleep(0.1)
                 
         except KeyboardInterrupt:
             print("\nStopping card reader...")
