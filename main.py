@@ -5,6 +5,7 @@ import csv
 from datetime import datetime
 import time
 import os
+from discord_webhook import DiscordWebhook
 
 def count_id_occurrences(filename, target_id):
     count = 0
@@ -29,7 +30,8 @@ def main():
     m.set_hico()
     m.set_bpi(210, 75, 210)
 
-    filename = os.path.join(logs_dir, f"{datetime.now().strftime('%m-%d-%y')}.csv")
+    #filename = os.path.join(logs_dir, f"{datetime.now().strftime('%m-%d-%y')}.csv")
+    filename = os.path.join(logs_dir, "open_hours_log.csv")
     file_exists = os.path.exists(filename) and os.path.getsize(filename) > 0
 
     with open(filename, 'a', newline='') as csvfile:
@@ -37,6 +39,10 @@ def main():
         if not file_exists:
             writer.writerow(['Date', 'Time', 'ID', 'Status'])
         
+        webhook_url = "https://discord.com/api/webhooks/1336824547986509824/qPCTH2oWaC3t6JExvotbplvqyh3BwdJmnFiGoF-gkR89r7pqUtHvhCq_NFmSvoIZnBcm"
+        webhook_in = DiscordWebhook(url=webhook_url, content="Club room is open")
+        webhook_out = DiscordWebhook(url=webhook_url, content="Club room is closed")
+
         print(f"Ready to read cards. Writing to {filename}. Press Ctrl+C to exit.")
         last_card_id = None
         last_read_time = 0
@@ -60,12 +66,18 @@ def main():
                         
                         try:
                             count = count_id_occurrences(filename, card_id)
-                            status = "Out" if count % 2 == 1 else "In"
+                            if count % 2 == 1:
+                                status = "Out"
+                                webhook_out.execute()
+                            else:
+                                status = "In"
+                                webhook_in.execute()
                             
                             writer.writerow([current_date, current_time_str, card_id, status])
                             print(f"Recorded ID: {card_id} at {current_date}, {current_time_str} - {status}")
                             csvfile.flush()
-                            
+
+
                             last_card_id = card_id
                             last_read_time = current_time
                         except Exception as e:
