@@ -39,9 +39,9 @@ def main():
         if not file_exists:
             writer.writerow(['Date', 'Time', 'ID', 'Status'])
         
-        webhook_url = "https://discord.com/api/webhooks/1336824547986509824/qPCTH2oWaC3t6JExvotbplvqyh3BwdJmnFiGoF-gkR89r7pqUtHvhCq_NFmSvoIZnBcm"
-        webhook_in = DiscordWebhook(url=webhook_url, content="Club room is open")
-        webhook_out = DiscordWebhook(url=webhook_url, content="Club room is closed")
+        webhook_url = "https://discord.com/api/webhooks/1337131683861758054/XMlMEcrbmBfBeTdXDgEEFOxfMZq5OJQXbd7dtAuUBhvo1GODsWNutASDqydWOjsLuxvx"
+        webhook_in = DiscordWebhook(url=webhook_url, content="The club room is open")
+        webhook_out = DiscordWebhook(url=webhook_url, content="The club room is closed")
 
         print(f"Ready to read cards. Writing to {filename}. Press Ctrl+C to exit.")
         last_card_id = None
