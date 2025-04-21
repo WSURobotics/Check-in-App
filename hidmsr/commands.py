@@ -73,7 +73,7 @@ def _data_handler(self, data):
 
 
 class MSRDevice():
-    """ Represents a MSR HID-based Magnetic Card Reader/Writier device. """
+    """ Represents a MSR HID-based Magnetic Card Reader/Writer device. """
 
     def __init__(self, vendor_id=0x0801, product_id=0x0003):
         _l.debug("Creating MSR device")
@@ -123,11 +123,12 @@ class MSRDevice():
                 response.extend(r)
             #self._lock.release()
             #return responses
-        except KeyboardInterrupt as e:
+            return response
+        except KeyboardInterrupt:
             print("Caught KeyboardInterrupt. Quitting command send.")
+            raise
         finally:
             self._lock.release()
-            return response
 
     def _send_command_nowait(self, command):
         """ Send a command to the MSR device without waiting for a result. """
@@ -137,8 +138,9 @@ class MSRDevice():
         try:
             self._lock.acquire()
             self.__send_command(command)
-        except KeyboardInterrupt as e:
+        except KeyboardInterrupt:
             print("Caught KeyboardInterrupt. Quitting command send.")
+            raise
         finally:
             self._lock.release()
 
@@ -180,7 +182,7 @@ class MSRDevice():
 
     def set_hico(self):
         """ Set high coercivity. """
-        self._send_command_wait([0xC2, 0x1B, 0x78])
+        self._send_command_nowait([0xC2, 0x1B, 0x78])
 
     def set_loco(self):
         """ Set low coercivity. """
@@ -192,26 +194,26 @@ class MSRDevice():
 
     def set_bpi(self, bpi1=0, bpi2=0, bpi3=0):
         """ Set the BPI for card reader. """
-        _l.warning("This method is unconfirmed. Please use caution!")
+        # _l.warning("This method is unconfirmed. Please use caution!")
 
         if bpi1 == 75:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0x4B])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0x4B])
         elif bpi1 == 210:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0xD2])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0xD2])
         elif bpi1 != 0:
             _l.warning("Unknown BPI set for track 1!")
 
         if bpi2 == 75:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0xA0])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0xA0])
         elif bpi2 == 210:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0xA1])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0xA1])
         elif bpi2 != 0:
             _l.warning("Unknown BPI set for track 2!")
 
         if bpi3 == 75:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0xC0])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0xC0])
         elif bpi3 == 210:
-            self._send_command_wait([0xC2, 0x1B, 0x62, 0xC1])
+            self._send_command_nowait([0xC2, 0x1B, 0x62, 0xC1])
         elif bpi3 != 0:
             _l.warning("Unknown BPI set for track 3!")
 
