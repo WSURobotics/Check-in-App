@@ -71,7 +71,6 @@ def main():
                             if cell.value == 'In':
                                 all_out = False
                     last_status = open_hours_sh.cell(row=open_hours_sh.max_row, column=4).value
-                    print(last_status)
                     if last_status == 'In' and all_out == True:
                         # CODE FOR OUT
                         print('Room closed')
