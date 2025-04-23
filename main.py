@@ -75,13 +75,13 @@ def main():
                         # CODE FOR OUT
                         print('Room closed')
                         if webhook == True:
-                            webhook_in.execute()
+                            webhook_out.execute()
                         open_hours_sh.append([current_date, current_time_str, card_id, 'Out'])
                     elif last_status == 'Out' and all_out == False:
                         # CODE FOR IN
                         print('Room open')
                         if webhook == True:
-                            webhook_out.execute()
+                            webhook_in.execute()
                         open_hours_sh.append([current_date, current_time_str, card_id, 'In'])
                 elif officer_changed == False:
                     # ADD NEW ROW WITH ID & TIME TO member_attendance_sh
